@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Mario Galaxy: O Filme — Countdown</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:ital,wght@0,400;0,700;0,800;1,800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:       #050818;
+      --bg-card:       rgba(10, 15, 40, 0.7);
+      --border-card:   rgba(255,255,255,0.08);
+      --text-primary:  #ffffff;
+      --text-muted:    #8899bb;
+      --accent-orange: #f5a623;
+      --accent-red:    #e84040;
+      --separator:     rgba(255,255,255,0.22);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── STARS BACKGROUND ── */
+    .stars-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--op, 0.6); transform: scale(1); }
+      50%       { opacity: 0.15;          transform: scale(0.6); }
+    }
+
+    /* ── NEBULAS ── */
+    .nebula {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .nebula-pink {
+      width: 420px; height: 380px;
+      background: radial-gradient(circle, rgba(220,80,180,0.45) 0%, transparent 70%);
+      top: 5%; left: -80px;
+    }
+    .nebula-purple {
+      width: 380px; height: 420px;
+      background: radial-gradient(circle, rgba(100,60,200,0.45) 0%, transparent 70%);
+      top: 0; right: -60px;
+    }
+    .nebula-blue {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(30,80,220,0.3) 0%, transparent 70%);
+      bottom: 10%; right: 8%;
+    }
+
+    /* ── GALAXY ── */
+    .galaxy {
+      position: absolute;
+      bottom: 5%; right: 2%;
+      width: 220px; height: 220px;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .galaxy svg { width: 100%; height: 100%; }
+
+    /* ── FLOATING MARIO STARS ── */
+    .mario-stars { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+    .ms {
+      position: absolute;
+      font-size: 1.8rem;
+      animation: floatStar var(--fs-dur, 6s) ease-in-out infinite;
+      animation-delay: var(--fs-delay, 0s);
+      filter: drop-shadow(0 0 8px rgba(255,200,0,0.6));
+    }
+    @keyframes floatStar {
+      0%, 100% { transform: translateY(0) rotate(-10deg); }
+      50%       { transform: translateY(-18px) rotate(10deg); }
+    }
+
+    /* ── LAYOUT ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem 5rem;
+      overflow: hidden;
+    }
+
+    .content { position: relative; z-index: 2; }
+
+    /* ── HEADLINE ── */
+    .headline {
+      font-size: clamp(1.8rem, 4.5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      max-width: 600px;
+      margin: 0 auto 0.5rem;
+    }
+    .headline .hl-orange { color: var(--accent-orange); }
+    .headline .hl-red    { color: var(--accent-red); font-style: italic; }
+
+    .sub-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.6rem;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 36px; height: 2px;
+      background: var(--accent-orange);
+      margin: 1.8rem auto;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    /* ── LABEL ── */
+    .premiere-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent-orange);
+      margin-bottom: 1.4rem;
+    }
+
+    /* ── COUNTDOWN CARD ── */
+    .countdown-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 2.2rem 3rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* ── UNIT ── */
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+
+    .number-wrap {
+      position: relative;
+      height: 1.1em;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 4.8rem);
+      line-height: 1;
+      color: #fff;
+      display: block;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    /* flip-out: sai para cima */
+    .number.flip-out {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    /* flip-in: entra de baixo */
+    .number.flip-in {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .number.flip-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.15s ease 0.12s, transform 0.15s ease 0.12s;
+    }
+
+    .unit-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ── SEPARATOR ── */
+    .sep {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      color: var(--separator);
+      padding: 0 0.6rem;
+      align-self: flex-start;
+      margin-top: 0.05em;
+      user-select: none;
+    }
+
+    /* ── DATE LINE ── */
+    .date-line {
+      margin-top: 1.8rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 1.5rem 1rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    footer .footer-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+    footer .disclaimer {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 500px) {
+      .countdown-card { padding: 1.5rem 1.2rem; gap: 0; }
+      .unit { min-width: 56px; }
+      .sep { padding: 0 0.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars-layer" id="starsLayer"></div>
+
+<main class="hero">
+  <!-- Nebulas -->
+  <div class="nebula nebula-pink"></div>
+  <div class="nebula nebula-purple"></div>
+  <div class="nebula nebula-blue"></div>
+
+  <!-- Galaxy -->
+  <div class="galaxy">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gal" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#a080ff" stop-opacity="0.9"/>
+          <stop offset="40%"  stop-color="#4040cc" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#101040" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="100" cy="100" rx="90" ry="40" fill="url(#gal)" transform="rotate(-30 100 100)"/>
+      <ellipse cx="100" cy="100" rx="60" ry="25" fill="rgba(180,140,255,0.3)" transform="rotate(-30 100 100)"/>
+      <circle  cx="100" cy="100" r="12" fill="rgba(220,200,255,0.9)"/>
+      <!-- spiral dots -->
+      <circle cx="130" cy="85"  r="2" fill="rgba(200,180,255,0.7)"/>
+      <circle cx="155" cy="95"  r="1.5" fill="rgba(200,180,255,0.5)"/>
+      <circle cx="70"  cy="115" r="2" fill="rgba(200,180,255,0.7)"/>
+      <circle cx="50"  cy="108" r="1.5" fill="rgba(200,180,255,0.5)"/>
+      <circle cx="120" cy="120" r="1.5" fill="rgba(200,180,255,0.4)"/>
+      <circle cx="82"  cy="78"  r="1.5" fill="rgba(200,180,255,0.4)"/>
+    </svg>
+  </div>
+
+  <!-- Mario Stars -->
+  <div class="mario-stars" id="marioStars"></div>
+
+  <div class="content" aria-live="polite" aria-label="Contador regressivo">
+
+    <h1 class="headline">
+      Cada <span class="hl-orange">estrela</span> guarda uma<br>
+      história. A sua começa <span class="hl-red">agora.</span>
+    </h1>
+    <p class="sub-title">Super Mario Galaxy: O Filme</p>
+
+    <div class="divider"></div>
+
+    <p class="premiere-label">Estreia nos cinemas em</p>
+
+    <div class="countdown-card" role="timer">
+      <!-- DIAS -->
+      <div class="unit" aria-label="dias">
+        <div class="number-wrap">
+          <span class="number" id="num-dias">000</span>
+        </div>
+        <span class="unit-label">Dias</span>
+      </div>
+
+      <span class="sep" aria-hidden="true">:</span>
+
+      <!-- HORAS -->
+      <div class="unit" aria-label="horas">
+        <div class="number-wrap">
+          <span class="number" id="num-horas">00</span>
+        </div>
+        <span class="unit-label">Horas</span>
+      </div>
+
+      <span class="sep" aria-hidden="true">:</span>
+
+      <!-- MINUTOS -->
+      <div class="unit" aria-label="minutos">
+        <div class="number-wrap">
+          <span class="number" id="num-min">00</span>
+        </div>
+        <span class="unit-label">Min</span>
+      </div>
+
+      <span class="sep" aria-hidden="true">:</span>
+
+      <!-- SEGUNDOS -->
+      <div class="unit" aria-label="segundos">
+        <div class="number-wrap">
+          <span class="number" id="num-seg">00</span>
+        </div>
+        <span class="unit-label">Seg</span>
+      </div>
+    </div>
+
+    <p class="date-line">Dia 25 de Dezembro, 2026</p>
+  </div>
+</main>
+
+<footer>
+  <p class="footer-title">Super Mario Galaxy: O Filme</p>
+  <p class="disclaimer">
+    Projeto criado para fins educacionais. Nintendo, Mario e personagens relacionados são marcas registradas da Nintendo Co., Ltd.
+  </p>
+</footer>
+
+<script>
+  /* ── GENERATE STARS ── */
+  (function generateStars() {
+    const layer = document.getElementById('starsLayer');
+    for (let i = 0; i < 160; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2.2 + 0.5;
+      const op   = (Math.random() * 0.5 + 0.3).toFixed(2);
+      const dur  = (Math.random() * 4 + 2).toFixed(1) + 's';
+      const del  = (Math.random() * 5).toFixed(1) + 's';
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%; left:${Math.random()*100}%;
+        --op:${op}; --dur:${dur}; --delay:${del};
+        opacity:${op};
+      `;
+      layer.appendChild(s);
+    }
+  })();
+
+  /* ── MARIO STARS POSITIONS ── */
+  (function placeMarioStars() {
+    const container = document.getElementById('marioStars');
+    const positions = [
+      { top: '12%', left: '5%',  delay: '0s',   dur: '5s'  },
+      { top: '10%', right: '8%', delay: '1.2s', dur: '6s'  },
+      { top: '30%', right: '3%', delay: '0.5s', dur: '7s'  },
+      { top: '60%', left: '3%',  delay: '2s',   dur: '5.5s'},
+      { top: '78%', right: '10%',delay: '0.8s', dur: '6.5s'},
+      { top: '20%', left: '14%', delay: '3s',   dur: '4.5s'},
+    ];
+    positions.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'ms';
+      el.textContent = '⭐';
+      el.style.top     = p.top   || 'auto';
+      el.style.left    = p.left  || 'auto';
+      el.style.right   = p.right || 'auto';
+      el.style.setProperty('--fs-delay', p.delay);
+      el.style.setProperty('--fs-dur',   p.dur);
+      container.appendChild(el);
+    });
+  })();
+
+  /* ── COUNTDOWN ── */
+  const TARGET = new Date('2026-12-25T00:00:00');
+
+  const els = {
+    dias:  document.getElementById('num-dias'),
+    horas: document.getElementById('num-horas'),
+    min:   document.getElementById('num-min'),
+    seg:   document.getElementById('num-seg'),
+  };
+
+  // Track previous values to animate only changed units
+  const prev = { dias: null, horas: null, min: null, seg: null };
+
+  function pad(n, len = 2) {
+    return String(n).padStart(len, '0');
+  }
+
+  function animateUnit(el, newVal) {
+    // 1. flip-out current
+    el.classList.add('flip-out');
+
+    setTimeout(() => {
+      // 2. swap text, set flip-in (invisible, below)
+      el.textContent = newVal;
+      el.classList.remove('flip-out');
+      el.classList.add('flip-in');
+
+      // force reflow so transition fires
+      void el.offsetWidth;
+
+      // 3. fade+slide in
+      el.classList.add('visible');
+
+      setTimeout(() => {
+        el.classList.remove('flip-in', 'visible');
+      }, 320);
+
+    }, 130);
+  }
+
+  function setUnit(key, newVal) {
+    if (prev[key] !== newVal) {
+      animateUnit(els[key], newVal);
+      prev[key] = newVal;
+    }
+  }
+
+  function tick() {
+    const now  = Date.now();
+    const diff = TARGET - now;
+
+    if (diff <= 0) {
+      // Zeroed out
+      ['dias','horas','min','seg'].forEach(k => setUnit(k, '00'));
+      return;
+    }
+
+    const totalSec = Math.floor(diff / 1000);
+    const seg   = totalSec % 60;
+    const totalMin = Math.floor(totalSec / 60);
+    const min   = totalMin % 60;
+    const totalHr = Math.floor(totalMin / 60);
+    const horas = totalHr % 24;
+    const dias  = Math.floor(totalHr / 24);
+
+    setUnit('dias',  String(dias));           // dias: no leading zero for 3-digit
+    setUnit('horas', pad(horas));
+    setUnit('min',   pad(min));
+    setUnit('seg',   pad(seg));
+  }
+
+  // Run immediately then every second
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
